@@ -16,7 +16,8 @@
 
 usage() {
 	echo "Usage: `basename $0` -A arch -C comp -a addr -e entry" \
-		"-v version -k kernel [-D name -d dtb] -o its_file"
+		"-v version -k kernel [-D name -d dtb] -o its_file" \
+		"-s script"
 	echo -e "\t-A ==> set architecture to 'arch'"
 	echo -e "\t-C ==> set compression type 'comp'"
 	echo -e "\t-c ==> set config name 'config'"
@@ -27,10 +28,11 @@ usage() {
 	echo -e "\t-D ==> human friendly Device Tree Blob 'name'"
 	echo -e "\t-d ==> include Device Tree Blob 'dtb'"
 	echo -e "\t-o ==> create output file 'its_file'"
+	echo -e "\t-s ==> include U-Boot script 'script'"
 	exit 1
 }
 
-while getopts ":A:a:c:C:D:d:e:k:o:v:" OPTION
+while getopts ":A:a:c:C:D:d:e:k:o:s:v:" OPTION
 do
 	case $OPTION in
 		A ) ARCH=$OPTARG;;
@@ -42,6 +44,7 @@ do
 		e ) ENTRY_ADDR=$OPTARG;;
 		k ) KERNEL=$OPTARG;;
 		o ) OUTPUT=$OPTARG;;
+		s ) SCRIPT=$OPTARG;;
 		v ) VERSION=$OPTARG;;
 		* ) echo "Invalid option passed to '$0' (options:$@)"
 		usage;;
@@ -76,6 +79,18 @@ if [ -n "${DTB}" ]; then
 "
 fi
 
+# Conditionally create script information
+if [ -n "${SCRIPT}" ]; then
+	SCRIPT="
+		script {
+			description = \"Script\";
+			data = /incbin/(\"${SCRIPT}\");
+			type = \"script\";
+			compression = \"none\";
+		};
+"
+fi
+
 # Create a default, fully populated DTS file
 DATA="/dts-v1/;
 
@@ -102,6 +117,8 @@ DATA="/dts-v1/;
 		};
 
 ${FDT}
+
+${SCRIPT}
 
 	};
 
