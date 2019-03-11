@@ -112,6 +112,7 @@ TARGET_DEVICES += armada-xp-db
 
 define Device/armada-xp-gp
 	$(call Device/marvell-nand,XP GP (DB-MV784MP-GP))
+	$(Device/UBI-factory)
 endef
 TARGET_DEVICES += armada-xp-gp
 
