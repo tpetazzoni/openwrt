@@ -87,6 +87,7 @@ endif
 JFFS2_BLOCKSIZE ?= 64k 128k
 
 fs-types-$(CONFIG_TARGET_ROOTFS_SQUASHFS) += squashfs
+fs-types-$(CONFIG_TARGET_ROOTFS_SQUASHFS_HASHED) += squashfs-hashed
 fs-types-$(CONFIG_TARGET_ROOTFS_JFFS2) += $(addprefix jffs2-,$(JFFS2_BLOCKSIZE))
 fs-types-$(CONFIG_TARGET_ROOTFS_JFFS2_NAND) += $(addprefix jffs2-nand-,$(NAND_BLOCKSIZE))
 fs-types-$(CONFIG_TARGET_ROOTFS_EXT4FS) += ext4
@@ -205,6 +206,17 @@ define Image/mkfs/squashfs
 		-comp $(SQUASHFSCOMP) $(SQUASHFSOPT) \
 		-processors 1 \
 		$(if $(SOURCE_DATE_EPOCH),-fixed-time $(SOURCE_DATE_EPOCH))
+endef
+
+define Image/mkfs/squashfs-hashed
+	$(STAGING_DIR_HOST)/bin/mksquashfs4 $(call mkfs_target_dir,$(1)) $@ \
+		-noappend -root-owned \
+		-comp $(SQUASHFSCOMP) $(SQUASHFSOPT) \
+		-processors 1 \
+		$(if $(SOURCE_DATE_EPOCH),-fixed-time $(SOURCE_DATE_EPOCH))
+	filesize=`stat -c "%s" $@` ; \
+	$(STAGING_DIR_HOST)/bin/veritysetup format --hash-offset=$${filesize} $@ $@ \
+		| $(TOPDIR)/scripts/prepare-dm-verity-uboot-script.sh > $@-dm-verity-uboot-script.txt
 endef
 
 # $(1): board name

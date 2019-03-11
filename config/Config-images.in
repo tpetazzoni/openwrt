@@ -152,6 +152,10 @@ menu "Target Images"
 			default 1024 if (SMALL_FLASH && !LOW_MEMORY_FOOTPRINT)
 			default 256
 
+		config TARGET_ROOTFS_SQUASHFS_HASHED
+			bool "hash with veritysetup"
+			depends on TARGET_ROOTFS_SQUASHFS
+
 	menuconfig TARGET_ROOTFS_UBIFS
 		bool "ubifs"
 		default y if USES_UBIFS
