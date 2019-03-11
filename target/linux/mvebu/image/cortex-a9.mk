@@ -110,9 +110,23 @@ define Device/armada-xp-db
 endef
 TARGET_DEVICES += armada-xp-db
 
+ifeq ($(CONFIG_TARGET_ROOTFS_SQUASHFS_HASHED),y)
+define Device/armada-xp-gp/kernel
+	ITS_UBOOT_SCRIPT := $(KDIR)/root.squashfs-hashed-dm-verity-uboot-script.txt
+	KERNEL := kernel-bin | append-dtb | fit none
+	KERNEL_SIZE := 4096k
+endef
+else
+define Device/armada-xp-gp/kernel
+	KERNEL := kernel-bin | append-dtb | uImage none
+	KERNEL_SIZE := 4096k
+endef
+endif
+
 define Device/armada-xp-gp
 	$(call Device/marvell-nand,XP GP (DB-MV784MP-GP))
 	$(Device/UBI-factory)
+	$(Device/armada-xp-gp/kernel)
 endef
 TARGET_DEVICES += armada-xp-gp
 
