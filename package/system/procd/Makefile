@@ -43,7 +43,7 @@ TARGET_LDFLAGS += -flto
 define Package/procd
   SECTION:=base
   CATEGORY:=Base system
-  DEPENDS:=+ubusd +ubus +libjson-script +ubox +USE_GLIBC:librt +libubox +libubus
+  DEPENDS:=+ubusd +ubus +libjson-script +ubox +USE_GLIBC:librt +libubox +libubus +PACKAGE_libselinux:libselinux
   TITLE:=OpenWrt system process manager
 endef
 
@@ -91,7 +91,8 @@ ifdef CONFIG_PACKAGE_procd-ujail
 endif
 
 SECCOMP=$(if $(CONFIG_PACKAGE_procd-seccomp),1,0)
-CMAKE_OPTIONS += -DSECCOMP_SUPPORT=$(SECCOMP) -DUTRACE_SUPPORT=$(SECCOMP)
+SELINUX=$(if $(CONFIG_PACKAGE_libselinux),1,0)
+CMAKE_OPTIONS += -DSECCOMP_SUPPORT=$(SECCOMP) -DUTRACE_SUPPORT=$(SECCOMP) -DSELINUX=$(SELINUX)
 
 define Package/procd/install
 	$(INSTALL_DIR) $(1)/sbin $(1)/etc $(1)/lib/functions
